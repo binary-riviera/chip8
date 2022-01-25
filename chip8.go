@@ -41,8 +41,12 @@ func (c *chip8) initialise() {
 	// TODO: implement font loading
 }
 
-func (c *chip8) loadGame() {
-
+func (c *chip8) loadGame(bytes []byte) {
+	size := len(bytes)
+	println(size)
+	for i := 0; i < size; i++ {
+		c.memory[i+0x200] = bytes[i]
+	}
 }
 
 func (c *chip8) emulateCycle() {
