@@ -50,9 +50,44 @@ func (c *chip8) loadGame(bytes []byte) {
 }
 
 func (c *chip8) emulateCycle() {
+	// fetch opcode
+	c.opcode = uint16(c.memory[c.pc])<<8 | uint16(c.memory[c.pc+1])
+	// decode opcode
+	ins := decodeOpcode(c.opcode)
+	print(ins)
+	// execute opcode
+
+	// update timers
 
 }
 
 func (c *chip8) setKeys() {
 
+}
+
+func decodeOpcode(opcode uint16) Opcode {
+	// should return some enum representing the code
+	if opcode == 0x00E0 {
+		return CLS
+	} else if firstDigit(opcode) == 0x1 {
+		return JP
+	} else if firstDigit(opcode) == 0x6 {
+		return LD_Vx
+	} else if firstDigit(opcode) == 0x7 {
+		return ADD
+	} else if firstDigit(opcode) == 0xA {
+		return LD_I
+	} else if firstDigit(opcode) == 0xD {
+		return DRW
+	} else {
+		return ERROR
+	}
+}
+
+func firstDigit(opcode uint16) uint16 {
+	return opcode >> 12
+}
+
+func first2Digits(opcode uint16) uint16 {
+	return opcode >> 8
 }

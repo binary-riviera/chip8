@@ -39,4 +39,11 @@ func main() {
 	bytes := readROM("roms/chip8-roms/programs/IBM Logo.ch8")
 	fmt.Println("Loaded ROM file")
 	c.loadGame(bytes)
+
+	// emulation loop
+	for {
+		// emulate one cycle
+		c.emulateCycle()
+		break
+	}
 }
