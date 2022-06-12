@@ -3,6 +3,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -32,9 +33,11 @@ func readROM(path string) []byte {
 }
 
 func main() {
+	verbosePtr := flag.Bool("verbose", false, "a bool")
+
 	fmt.Println("Starting chip-8 emulator")
 	c := chip8{}
-	c.initialise()
+	c.initialise(*verbosePtr)
 	fmt.Println("Initialised emulator...")
 	bytes := readROM("roms/chip8-roms/programs/IBM Logo.ch8")
 	fmt.Println("Loaded ROM file")
@@ -44,6 +47,5 @@ func main() {
 	for {
 		// emulate one cycle
 		c.emulateCycle()
-		break
 	}
 }
