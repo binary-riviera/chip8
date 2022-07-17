@@ -35,6 +35,8 @@ func readROM(path string) []byte {
 func main() {
 	verbosePtr := flag.Bool("verbose", false, "a bool")
 
+	flag.Parse()
+
 	fmt.Println("Starting chip-8 emulator")
 	c := chip8{}
 	c.initialise(*verbosePtr)

@@ -15,6 +15,7 @@ type chip8 struct {
 	sp          uint16        //
 	key         [16]byte      // current keypad state
 	verbose     bool          // whether to run the emulator in verbose mode
+	last_ins    uint16        // the instruction from the last cycle
 }
 
 func (c *chip8) initialise(verbose bool) {
@@ -45,28 +46,31 @@ func (c *chip8) initialise(verbose bool) {
 }
 
 func (c *chip8) emulateCycle() {
-	// fetch opcode
+	// FETCH
 	c.ins = uint16(c.memory[c.pc])<<8 | uint16(c.memory[c.pc+1])
-	// decode opcode
-	if c.verbose {
+
+	// DECODE
+	if c.verbose && c.ins != c.last_ins {
 		fmt.Printf("Instruction: 0x%x\n", c.ins)
+
 	}
 	opcode := decodeOpcode(c.ins)
 	if opcode == ERROR {
 		panic("Error, invalid instruction!")
 	}
-	if c.verbose {
+	if c.verbose && c.ins != c.last_ins {
 		fmt.Println(opcode)
 	}
 
-	// execute opcode
+	// EXECUTE
 	c.execute(opcode, c.ins)
 
-	// update timers
-
+	// RESET
+	// update timer
 	if opcode != JP { // If jumping PC shouldn't be increased
 		c.pc += 2 // since an opcode is 2 bytes long
 	}
+	c.last_ins = c.ins // record the last instruction
 }
 
 func (c *chip8) loadGame(bytes []byte) {
