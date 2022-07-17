@@ -22,9 +22,10 @@ type chip8 struct {
 	verbose     bool          // whether to run the emulator in verbose mode
 	last_ins    uint16        // the instruction from the last cycle
 	sdl_window  *sdl.Window   // the SDL window to write to
+	sdl_scale   int32         // the scale for the SDL window
 }
 
-func (c *chip8) initialise(window *sdl.Window, verbose bool) {
+func (c *chip8) initialise(window *sdl.Window, scale int, verbose bool) {
 	c.verbose = verbose
 	c.pc = 0x200 // program counter starts at 0x200
 	c.ins = 0
@@ -33,6 +34,7 @@ func (c *chip8) initialise(window *sdl.Window, verbose bool) {
 	c.delay_timer = 0
 	c.sound_timer = 0
 	c.sdl_window = window
+	c.sdl_scale = int32(scale)
 	// clear and show display
 	c.clearDisplay()
 	c.showDisplay()
@@ -105,7 +107,7 @@ func (c *chip8) showDisplay() {
 		panic(err)
 	}
 	surface.FillRect(nil, 0)
-	rect := sdl.Rect{0, 0, 32, 16}
+	rect := sdl.Rect{0, 0, 32 * c.sdl_scale, 16 * c.sdl_scale}
 	surface.FillRect(&rect, 0xffff0000)
 	c.sdl_window.UpdateSurface()
 }
