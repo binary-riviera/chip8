@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 type chip8 struct {
 	memory      [4096]byte    // Chip8 has 4k of memory
@@ -76,7 +79,7 @@ func (c *chip8) emulateCycle() {
 func (c *chip8) loadGame(bytes []byte) {
 	size := len(bytes)
 	if c.verbose {
-		fmt.Println(size)
+		fmt.Println("Loaded " + strconv.Itoa(size) + " lines")
 	}
 	for i := 0; i < size; i++ {
 		c.memory[i+0x200] = bytes[i]
@@ -95,11 +98,16 @@ func (c *chip8) clearDisplay() {
 
 func (c *chip8) execute(opcode Opcode, ins uint16) {
 
-	if opcode == DRW {
+	if opcode == CLS {
 		c.clearDisplay()
 	} else if opcode == JP {
-		// set PC to NNN
-		c.pc = last3Digits(ins)
+		c.pc = last3Digits(ins) // set PC to NNN
+	} else if opcode == LD_I {
+		c.I = last3Digits(ins) // set I to NNN
+	} else if opcode == LD_Vx {
+		c.V[secondDigit(ins)] = byte(last2Digits(ins)) // set V[x] to NN
+	} else {
+		panic("ERROR! opcode " + opcode + " not implemented")
 	}
 
 }
@@ -121,16 +129,4 @@ func decodeOpcode(ins uint16) Opcode {
 	} else {
 		return ERROR
 	}
-}
-
-func firstDigit(opcode uint16) uint16 {
-	return opcode >> 12
-}
-
-func first2Digits(opcode uint16) uint16 {
-	return opcode >> 8
-}
-
-func last3Digits(opcode uint16) uint16 {
-	return opcode & 0x0fff
 }
