@@ -107,8 +107,19 @@ func (c *chip8) showDisplay() {
 		panic(err)
 	}
 	surface.FillRect(nil, 0)
-	rect := sdl.Rect{0, 0, 32 * c.sdl_scale, 16 * c.sdl_scale}
-	surface.FillRect(&rect, 0xffff0000)
+	for i := 0; i < 64*32; i++ {
+		row := i / 64
+		col := i % 64
+		rect := sdl.Rect{X: int32(col) * c.sdl_scale, Y: int32(row) * c.sdl_scale, W: 1 * c.sdl_scale, H: 1 * c.sdl_scale}
+		colour := 0xffffffff
+		if col%2 == 0 && row%2 == 0 || col%2 == 1 && row%2 == 1 {
+			colour = 0x00000000
+		}
+		surface.FillRect(&rect, uint32(colour))
+		fmt.Println("row is: " + strconv.Itoa(row) + ", col is: " + strconv.Itoa(col))
+	}
+	//rect := sdl.Rect{0, 0, 32 * c.sdl_scale, 16 * c.sdl_scale}
+	///surface.FillRect(&rect, 0xffff0000)
 	c.sdl_window.UpdateSurface()
 }
 
@@ -116,6 +127,8 @@ func (c *chip8) execute(opcode Opcode, ins uint16) {
 
 	if opcode == CLS {
 		c.clearDisplay()
+	} else if opcode == DRW {
+
 	} else if opcode == JP {
 		c.pc = last3Digits(ins) // set PC to NNN
 	} else if opcode == LD_I {

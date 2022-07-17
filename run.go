@@ -45,16 +45,6 @@ func main() {
 	fmt.Println("Loaded ROM file")
 	c.loadGame(bytes)
 
-	/*surface, err := window.GetSurface()
-	if err != nil {
-		panic(err)
-	}
-	surface.FillRect(nil, 0)
-
-	rect := sdl.Rect{0, 0, 200, 200}
-	surface.FillRect(&rect, 0xffff0000)
-	window.UpdateSurface()
-	*/
 	running := true
 	for running {
 		//c.emulateCycle()
