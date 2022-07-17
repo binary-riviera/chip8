@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+
+	"github.com/veandco/go-sdl2/sdl"
 )
 
 func readROM(path string) []byte {
@@ -36,18 +38,52 @@ func main() {
 	verbosePtr := flag.Bool("verbose", false, "a bool")
 
 	flag.Parse()
-
+	fmt.Println("Loading SDL...")
+	window := setupSDL()
 	fmt.Println("Starting chip-8 emulator")
 	c := chip8{}
-	c.initialise(*verbosePtr)
+	c.initialise(window, *verbosePtr)
 	fmt.Println("Initialised emulator...")
 	bytes := readROM("roms/chip8-roms/programs/IBM Logo.ch8")
 	fmt.Println("Loaded ROM file")
 	c.loadGame(bytes)
 
-	// emulation loop
-	for {
-		// emulate one cycle
-		c.emulateCycle()
+	/*surface, err := window.GetSurface()
+	if err != nil {
+		panic(err)
 	}
+	surface.FillRect(nil, 0)
+
+	rect := sdl.Rect{0, 0, 200, 200}
+	surface.FillRect(&rect, 0xffff0000)
+	window.UpdateSurface()
+	*/
+	running := true
+	for running {
+		//c.emulateCycle()
+
+		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
+			switch event.(type) {
+			case *sdl.QuitEvent:
+				println("Quit")
+				running = false
+				break
+			}
+		}
+	}
+}
+
+func setupSDL() *sdl.Window {
+	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
+		panic(err)
+	}
+	//defer sdl.Quit()
+
+	window, err := sdl.CreateWindow("test", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 64, 32, sdl.WINDOW_SHOWN)
+	if err != nil {
+		panic(err)
+	}
+	//defer window.Destroy()
+
+	return window
 }

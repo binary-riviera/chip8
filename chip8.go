@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"strconv"
+
+	"github.com/veandco/go-sdl2/sdl"
 )
 
 type chip8 struct {
@@ -19,9 +21,10 @@ type chip8 struct {
 	key         [16]byte      // current keypad state
 	verbose     bool          // whether to run the emulator in verbose mode
 	last_ins    uint16        // the instruction from the last cycle
+	sdl_window  *sdl.Window   // the SDL window to write to
 }
 
-func (c *chip8) initialise(verbose bool) {
+func (c *chip8) initialise(window *sdl.Window, verbose bool) {
 	c.verbose = verbose
 	c.pc = 0x200 // program counter starts at 0x200
 	c.ins = 0
@@ -29,10 +32,10 @@ func (c *chip8) initialise(verbose bool) {
 	c.sp = 0
 	c.delay_timer = 0
 	c.sound_timer = 0
-	// clear display
-	for i := 0; i < len(c.display); i++ {
-		c.display[i] = 0
-	}
+	c.sdl_window = window
+	// clear and show display
+	c.clearDisplay()
+	c.showDisplay()
 	// clear stack
 	for i := 0; i < len(c.stack); i++ {
 		c.stack[i] = 0
@@ -94,6 +97,17 @@ func (c *chip8) clearDisplay() {
 	for i := range c.display {
 		c.display[i] = 0
 	}
+}
+
+func (c *chip8) showDisplay() {
+	surface, err := c.sdl_window.GetSurface()
+	if err != nil {
+		panic(err)
+	}
+	surface.FillRect(nil, 0)
+	rect := sdl.Rect{0, 0, 32, 16}
+	surface.FillRect(&rect, 0xffff0000)
+	c.sdl_window.UpdateSurface()
 }
 
 func (c *chip8) execute(opcode Opcode, ins uint16) {
