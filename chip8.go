@@ -127,9 +127,6 @@ func (c *chip8) showDisplay() {
 }
 
 func (c *chip8) draw(xV uint16, yV uint16, n uint16) {
-	//c.clearDisplay()
-	//c.showDisplay()
-
 	// first we need to get the X and Y coordinates from VX and VY
 	// We need to account for wrapping by modding the width of the screen
 	x := c.V[xV] % WINDOW_WIDTH
@@ -146,11 +143,8 @@ func (c *chip8) draw(xV uint16, yV uint16, n uint16) {
 		// represents a new row
 		sprite := c.memory[int(c.I)+i]
 		// we need to iterate through every bit in the sprite
-		//j := 0
-		//fmt.Println(sprite)
 		for mask := byte(0x80); mask != 0; mask >>= 1 {
 			if (sprite & mask) != 0 { // it's 1
-				//println("foo")
 				// so we need to get the xy coord from c.display to compare
 				// it should be something like Y * width + X + j
 				idx := int(y)*WINDOW_WIDTH + int(x) // j
@@ -160,16 +154,13 @@ func (c *chip8) draw(xV uint16, yV uint16, n uint16) {
 				} else {
 					c.display[idx] = 1
 				}
-				//fmt.Println(idx)
 			} else { // it's 0
 
 			}
-			//j++
 			x++
 		}
 		y++
 	}
-
 	c.showDisplay()
 }
 
@@ -182,7 +173,7 @@ func (c *chip8) execute(opcode Opcode, ins uint16) {
 		c.pc = last3Digits(ins) // set PC to NNN
 	} else if opcode == LD_I {
 		c.I = last3Digits(ins) // set I to NNN
-	} else if opcode == LD_Vx {
+	} else if opcode == LD {
 		c.V[secondDigit(ins)] = byte(last2Digits(ins)) // set V[x] to NN
 	} else if opcode == ADD {
 		c.V[secondDigit(ins)] += byte(last2Digits(ins)) // Add Vx += kk
@@ -197,14 +188,56 @@ func decodeOpcode(ins uint16) Opcode {
 		return CLS
 	} else if firstDigit(ins) == 0x1 {
 		return JP
+	} else if firstDigit(ins) == 0x2 || ins == 0x00EE {
+		return SRD
+	} else if firstDigit(ins) == 0x3 || firstDigit(ins) == 0x4 || firstDigit(ins) == 0x5 || firstDigit(ins) == 0x9 {
+		return SKP
 	} else if firstDigit(ins) == 0x6 {
-		return LD_Vx
+		return LD
 	} else if firstDigit(ins) == 0x7 {
 		return ADD
+	} else if firstDigit(ins) == 0x8 {
+		if lastDigit(ins) == 0 {
+			return SET
+		} else if lastDigit(ins) == 0x1 {
+			return OR
+		} else if lastDigit(ins) == 0x2 {
+			return AND
+		} else if lastDigit(ins) == 0x3 {
+			return XOR
+		} else if lastDigit(ins) == 0x4 {
+			return ADD_V
+		} else if lastDigit(ins) == 0x5 || lastDigit(ins) == 0x7 {
+			return SUB_V
+		} else if lastDigit(ins) == 0x6 || lastDigit(ins) == 0xE {
+			return SHFT
+		} else {
+			return ERROR
+		}
 	} else if firstDigit(ins) == 0xA {
 		return LD_I
+	} else if firstDigit(ins) == 0xB {
+		return JP_O
+	} else if firstDigit(ins) == 0xC {
+		return RND
 	} else if firstDigit(ins) == 0xD {
 		return DRW
+	} else if firstDigit(ins) == 0xE {
+		return SKPIF
+	} else if firstDigit(ins) == 0xF && last2Digits(ins) == 0x1E {
+		return ADD_I
+	} else if firstDigit(ins) == 0xF && last2Digits(ins) == 0x0A {
+		return KEY
+	} else if firstDigit(ins) == 0xF && last2Digits(ins) == 0x29 {
+		return FC
+	} else if firstDigit(ins) == 0xF && last2Digits(ins) == 0x33 {
+		return BCDC
+	} else if firstDigit(ins) == 0xF && last2Digits(ins) == 0x55 {
+		return STORE
+	} else if firstDigit(ins) == 0xF && last2Digits(ins) == 0x65 {
+		return LOAD
+	} else if firstDigit(ins) == 0xF {
+		return TIMER
 	} else {
 		return ERROR
 	}
