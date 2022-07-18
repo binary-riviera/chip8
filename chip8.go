@@ -8,24 +8,23 @@ import (
 )
 
 type chip8 struct {
-	memory      [4096]byte    // Chip8 has 4k of memory
-	V           [16]byte      // CPU Registers V0-VE
-	display     [64 * 32]byte // graphics
-	ins         uint16        // the current opcode/instruction (2 bytes long)
-	I           uint16        // index register
-	pc          uint16        // program counter
-	delay_timer byte          //
-	sound_timer byte          //
-	stack       [16]uint16    //
-	sp          uint16        //
-	key         [16]byte      // current keypad state
-	verbose     bool          // whether to run the emulator in verbose mode
-	last_ins    uint16        // the instruction from the last cycle
-	sdl_window  *sdl.Window   // the SDL window to write to
-	sdl_scale   int32         // the scale for the SDL window
+	memory      [4096]byte                         // Chip8 has 4k of memory
+	V           [16]byte                           // CPU Registers V0-VE
+	display     [WINDOW_WIDTH * WINDOW_HEIGHT]byte // graphics
+	ins         uint16                             // the current opcode/instruction (2 bytes long)
+	I           uint16                             // index register
+	pc          uint16                             // program counter
+	delay_timer byte                               //
+	sound_timer byte                               //
+	stack       [16]uint16                         //
+	sp          uint16                             //
+	key         [16]byte                           // current keypad state
+	verbose     bool                               // whether to run the emulator in verbose mode
+	last_ins    uint16                             // the instruction from the last cycle
+	sdl_window  *sdl.Window                        // the SDL window to write to
 }
 
-func (c *chip8) initialise(window *sdl.Window, scale int, verbose bool) {
+func (c *chip8) initialise(window *sdl.Window, verbose bool) {
 	c.verbose = verbose
 	c.pc = 0x200 // program counter starts at 0x200
 	c.ins = 0
@@ -34,7 +33,6 @@ func (c *chip8) initialise(window *sdl.Window, scale int, verbose bool) {
 	c.delay_timer = 0
 	c.sound_timer = 0
 	c.sdl_window = window
-	c.sdl_scale = int32(scale)
 	// clear and show display
 	c.clearDisplay()
 	c.showDisplay()
@@ -107,19 +105,17 @@ func (c *chip8) showDisplay() {
 		panic(err)
 	}
 	surface.FillRect(nil, 0)
-	for i := 0; i < 64*32; i++ {
-		row := i / 64
-		col := i % 64
-		rect := sdl.Rect{X: int32(col) * c.sdl_scale, Y: int32(row) * c.sdl_scale, W: 1 * c.sdl_scale, H: 1 * c.sdl_scale}
+	for i := 0; i < WINDOW_WIDTH*WINDOW_HEIGHT; i++ {
+		row := i / WINDOW_WIDTH
+		col := i % WINDOW_WIDTH
+		rect := sdl.Rect{X: int32(col) * WINDOW_SCALE, Y: int32(row) * WINDOW_SCALE, W: 1 * WINDOW_SCALE, H: 1 * WINDOW_SCALE}
 		colour := 0xffffffff
 		if col%2 == 0 && row%2 == 0 || col%2 == 1 && row%2 == 1 {
 			colour = 0x00000000
 		}
 		surface.FillRect(&rect, uint32(colour))
-		fmt.Println("row is: " + strconv.Itoa(row) + ", col is: " + strconv.Itoa(col))
+		//fmt.Println("row is: " + strconv.Itoa(row) + ", col is: " + strconv.Itoa(col))
 	}
-	//rect := sdl.Rect{0, 0, 32 * c.sdl_scale, 16 * c.sdl_scale}
-	///surface.FillRect(&rect, 0xffff0000)
 	c.sdl_window.UpdateSurface()
 }
 
