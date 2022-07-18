@@ -49,6 +49,7 @@ func (c *chip8) initialise(window *sdl.Window, verbose bool) {
 		c.memory[i] = 0
 	}
 	// TODO: implement font loading
+	c.loadFont()
 }
 
 func (c *chip8) emulateCycle() {
@@ -93,6 +94,13 @@ func (c *chip8) setKeys() {
 
 }
 
+func (c *chip8) loadFont() {
+	// starts at 050, ends at 09F
+	for i := 0; i < 80; i++ {
+		c.memory[i+0x050] = FONT[i]
+	}
+}
+
 func (c *chip8) clearDisplay() {
 	for i := range c.display {
 		c.display[i] = 0
@@ -118,22 +126,69 @@ func (c *chip8) showDisplay() {
 	c.sdl_window.UpdateSurface()
 }
 
-func (c *chip8) execute(opcode Opcode, ins uint16) {
+func (c *chip8) draw(xV uint16, yV uint16, n uint16) {
+	//c.clearDisplay()
+	//c.showDisplay()
 
+	// first we need to get the X and Y coordinates from VX and VY
+	// We need to account for wrapping by modding the width of the screen
+	x := c.V[xV] % WINDOW_WIDTH
+	old_x := x
+	y := c.V[yV] % WINDOW_HEIGHT
+	if c.verbose {
+		fmt.Println("x: " + strconv.Itoa(int(x)) + ", y: " + strconv.Itoa(int(y)))
+	}
+	// next we need to set VF to 0 for later
+	c.V[0xF] = 0
+	// now the hard part...
+	for i := 0; i < int(n); i++ {
+		x = old_x
+		// represents a new row
+		sprite := c.memory[int(c.I)+i]
+		// we need to iterate through every bit in the sprite
+		//j := 0
+		//fmt.Println(sprite)
+		for mask := byte(0x80); mask != 0; mask >>= 1 {
+			if (sprite & mask) != 0 { // it's 1
+				//println("foo")
+				// so we need to get the xy coord from c.display to compare
+				// it should be something like Y * width + X + j
+				idx := int(y)*WINDOW_WIDTH + int(x) // j
+				if c.display[idx] == 1 {
+					c.display[idx] = 0
+					c.V[0xF] = 1
+				} else {
+					c.display[idx] = 1
+				}
+				//fmt.Println(idx)
+			} else { // it's 0
+
+			}
+			//j++
+			x++
+		}
+		y++
+	}
+
+	c.showDisplay()
+}
+
+func (c *chip8) execute(opcode Opcode, ins uint16) {
 	if opcode == CLS {
 		c.clearDisplay()
 	} else if opcode == DRW {
-
+		c.draw(secondDigit(ins), thirdDigit(ins), lastDigit(ins))
 	} else if opcode == JP {
 		c.pc = last3Digits(ins) // set PC to NNN
 	} else if opcode == LD_I {
 		c.I = last3Digits(ins) // set I to NNN
 	} else if opcode == LD_Vx {
 		c.V[secondDigit(ins)] = byte(last2Digits(ins)) // set V[x] to NN
+	} else if opcode == ADD {
+		c.V[secondDigit(ins)] += byte(last2Digits(ins)) // Add Vx += kk
 	} else {
 		panic("ERROR! opcode " + opcode + " not implemented")
 	}
-
 }
 
 func decodeOpcode(ins uint16) Opcode {

@@ -46,7 +46,7 @@ func main() {
 
 	running := true
 	for running {
-		//c.emulateCycle()
+		c.emulateCycle()
 
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch event.(type) {
