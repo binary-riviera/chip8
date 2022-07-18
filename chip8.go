@@ -110,11 +110,10 @@ func (c *chip8) showDisplay() {
 		col := i % WINDOW_WIDTH
 		rect := sdl.Rect{X: int32(col) * WINDOW_SCALE, Y: int32(row) * WINDOW_SCALE, W: 1 * WINDOW_SCALE, H: 1 * WINDOW_SCALE}
 		colour := 0xffffffff
-		if col%2 == 0 && row%2 == 0 || col%2 == 1 && row%2 == 1 {
+		if c.display[i] == 1 {
 			colour = 0x00000000
 		}
 		surface.FillRect(&rect, uint32(colour))
-		//fmt.Println("row is: " + strconv.Itoa(row) + ", col is: " + strconv.Itoa(col))
 	}
 	c.sdl_window.UpdateSurface()
 }
