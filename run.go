@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -56,6 +57,8 @@ func main() {
 				break
 			}
 		}
+		millisecondsToSleep := 1000 / CPU_FREQ
+		time.Sleep(time.Duration(millisecondsToSleep) * time.Millisecond)
 	}
 
 	window.Destroy()

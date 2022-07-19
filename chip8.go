@@ -95,7 +95,7 @@ func (c *chip8) setKeys() {
 }
 
 func (c *chip8) loadFont() {
-	// starts at 050, ends at 09F
+	// starts at 0x050, ends at 0x09F
 	for i := 0; i < 80; i++ {
 		c.memory[i+0x050] = FONT[i]
 	}
@@ -167,6 +167,7 @@ func (c *chip8) draw(xV uint16, yV uint16, n uint16) {
 func (c *chip8) execute(opcode Opcode, ins uint16) {
 	if opcode == CLS {
 		c.clearDisplay()
+		c.showDisplay()
 	} else if opcode == DRW {
 		c.draw(secondDigit(ins), thirdDigit(ins), lastDigit(ins))
 	} else if opcode == JP {

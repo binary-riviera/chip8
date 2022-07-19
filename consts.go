@@ -4,6 +4,7 @@ const (
 	WINDOW_HEIGHT = 32
 	WINDOW_WIDTH  = 64
 	WINDOW_SCALE  = 10
+	CPU_FREQ      = 500 // Hz
 )
 
 // can't hardcode arrays as consts in Go
